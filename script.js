@@ -11,7 +11,7 @@ let sortType = ''; // 'price-asc', 'price-desc', 'name-asc', 'name-desc'
 async function fetchProducts() {
     try {
         const response = await fetch(API_URL);
-        
+
         // Kiểm tra nếu request thành công
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -28,7 +28,7 @@ async function fetchProducts() {
 // Hàm xử lý dữ liệu (Lọc -> Sắp xếp -> Phân trang) và gọi render
 function processAndRender() {
     // 1. Lọc theo tên (Search)
-    let filtered = allProducts.filter(p => 
+    let filtered = allProducts.filter(p =>
         p.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -46,7 +46,7 @@ function processAndRender() {
     // 3. Phân trang (Pagination)
     const totalItems = filtered.length;
     const totalPages = Math.ceil(totalItems / pageSize);
-    
+
     // Đảm bảo currentPage hợp lệ
     if (currentPage > totalPages) currentPage = totalPages || 1;
     if (currentPage < 1) currentPage = 1;
@@ -69,26 +69,50 @@ function renderTable(products) {
     }
 
     products.forEach(product => {
-        // Xử lý ảnh: API này đôi khi trả về chuỗi JSON trong mảng ảnh, cần làm sạch
-        // let imageUrl = 'https://via.placeholder.com/300';
-        if (product.images && product.images.length > 0) {
-            let rawImg = product.images[0];
-            try {
-                if (rawImg.startsWith('["') || rawImg.startsWith('[\"')) {
-                    rawImg = JSON.parse(rawImg)[0];
+        let imagesHtml = '';
+
+        if (product.images && Array.isArray(product.images)) {
+            // Duyệt qua từng item trong mảng images
+            imagesHtml = product.images.map(img => {
+                let finalUrl = img;
+
+                // Kiểm tra nếu img là chuỗi và trông giống JSON (bắt đầu bằng [ )
+                if (typeof img === 'string' && img.startsWith('[')) {
+                    try {
+                        const parsed = JSON.parse(img);
+                        // Nếu sau khi parse ra một mảng, lấy phần tử đầu tiên
+                        finalUrl = Array.isArray(parsed) ? parsed[0] : img;
+                    } catch (e) {
+                        // Nếu lỗi parse, giữ nguyên url gốc
+                        finalUrl = img;
+                    }
                 }
-            } catch (e) { /* Bỏ qua lỗi parse */ }
-            imageUrl = rawImg;
+
+                // Làm sạch các ký tự dư thừa như dấu ngoặc kép hoặc dấu xuyệt nếu có
+                finalUrl = finalUrl.replace(/[\[\]"\\]/g, '');
+
+                return `
+                <img src="${finalUrl}" 
+                     class="table-img" 
+                     referrerpolicy="no-referrer" 
+                     onerror="this.src='https://via.placeholder.com/100'">
+            `;
+            }).join('');
+        }
+
+        // Nếu sau tất cả vẫn không có ảnh nào, dùng ảnh mặc định
+        if (!imagesHtml) {
+            imagesHtml = `<img src="https://via.placeholder.com/100" class="table-img">`;
         }
 
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td><img src="${imageUrl}" alt="${product.title}" class="table-img" referrerpolicy="no-referrer" onerror="this.src='https://via.placeholder.com/300'"></td>
-            <td><strong>${product.title}</strong></td>
-            <td>${product.category ? product.category.name : 'Uncategorized'}</td>
-            <td style="color: #e63946; font-weight: bold;">$${product.price}</td>
-            <td>${product.description}</td>
-        `;
+        <td><div class="image-gallery">${imagesHtml}</div></td>
+        <td><strong>${product.title}</strong></td>
+        <td>${product.category ? product.category.name : 'Uncategorized'}</td>
+        <td style="color: #e63946; font-weight: bold;">$${product.price}</td>
+        <td class="desc-cell">${product.description}</td>
+    `;
         tbody.appendChild(row);
     });
 }
@@ -102,12 +126,12 @@ function renderPagination(totalPages) {
         const btn = document.createElement('button');
         btn.innerText = i;
         if (i === currentPage) btn.classList.add('active');
-        
+
         btn.addEventListener('click', () => {
             currentPage = i;
             processAndRender();
         });
-        
+
         paginationDiv.appendChild(btn);
     }
 }
