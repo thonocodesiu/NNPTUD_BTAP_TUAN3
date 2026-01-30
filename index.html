@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        /* Controls Styling */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .controls input, .controls select, .controls button {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        /* Zebra Striping: 1 dòng đen (tối), 1 dòng trắng */
+        tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+            color: #000;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #333333; /* Dòng màu đen */
+            color: #ffffff; /* Chữ màu trắng để dễ đọc trên nền đen */
+        }
+        
+        .table-img {
+            width: 100px;
+            height: auto;
+            display: block;
+            border-radius: 4px;
+        }
+
+        /* Pagination Styling */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 8px 12px;
+            cursor: pointer;
+            background: white;
+            border: 1px solid #ddd;
+        }
+        .pagination button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product Dashboard</h1>
+    
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên...">
+        
+        <select id="pageSizeSelect">
+            <option value="5">Hiển thị 5</option>
+            <option value="10" selected>Hiển thị 10</option>
+            <option value="20">Hiển thị 20</option>
+        </select>
+
+        <select id="sortSelect">
+            <option value="">Sắp xếp...</option>
+            <option value="price-asc">Giá: Thấp đến Cao</option>
+            <option value="price-desc">Giá: Cao đến Thấp</option>
+            <option value="name-asc">Tên: A-Z</option>
+            <option value="name-desc">Tên: Z-A</option>
+        </select>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Hình ảnh</th>
+                <th>Tên sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Giá</th>
+                <th>Mô tả</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr><td colspan="5" style="text-align:center">Loading products...</td></tr>
+        </tbody>
+    </table>
+
+    <div id="pagination" class="pagination"></div>
+</body>
+<script src="script.js"></script>
+</html>
